@@ -6,7 +6,7 @@ SimpleBot exploits small changes in currency prices: it buys at the mean price m
 
 For example, you have BTC balance ```0,00292601``` and nothing on Waves balance, we trade on Waves as an amount asset and BTC as price_asset. Best bid is ```0.00057896```, best ask is ```0.00058248``` and price step is ```0.5%``` from meanprice. The meanprice for this orderbook is ```0.00058072```. The SimpleBot place the buy order at price ```meanprice * (1 - price_step)``` i.e. ```0.0005778164``` and we place the amount, equals to ```(BTC_balance / bid_price) - order_fee``` i.e. ```506090957```. And the sell order at ```meanprice * (1 + price_step)``` i.e. ```58362.35999999999```, but we have no Waves, and can place only ```amount = 0```, but if we had Waves on our account too then we would set an amount equal to ```Waves_balance - order_fee```.
 
-## Getting Started
+##Installation
 
 SimpleBot requires Python 3.x and the following Python packages:
 
@@ -20,13 +20,17 @@ pip install pywaves
 pip install configparser 
 ```
 
+## Getting Started
+
 You can start SimpleBot with this command:
 
 ```
-python SimpleBot.py 
+python SimpleBot.py sample-bot.cfg
 ```
 
-#### Designations
+#### Configuration
+
+Configuration file ```sample-bot.cfg``` have next set of parameters:
 ```node``` is the address of the fullnode
 
 ```matcher``` is the matcher address
