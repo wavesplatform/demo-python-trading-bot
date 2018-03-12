@@ -14,7 +14,7 @@ class SimpleBot:
         self.mather = "https://nodes.wavesnodes.com"
         self.order_fee = int(0.003 * 10 ** 8)
         self.order_lifetime = 29 * 86400 #29 days
-        self.private_key = "Fc3Nn5aSjCjFLZgvqMbRv1Sznx2dhKn8JRScN5SdTwne"
+        self.private_key = ""
         self.amount_asset = pw.WAVES
         self.price_asset = pw.Asset("8LQW8f7P5d5PZM7GtZEBgaqRPGSzS3DfPuiXrURJ4AJS") #BTC
         self.price_step = 0.005
