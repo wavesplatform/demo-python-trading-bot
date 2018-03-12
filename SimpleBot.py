@@ -1,14 +1,13 @@
 import pywaves as pw
 import datetime
 from time import sleep
-import math
 import os
 import configparser
 
 
 class SimpleBot:
     def __init__(self):
-        self.log_file = "log"
+        self.log_file = "bot.log"
         self.node = "https://nodes.wavesnodes.com"
         self.chain = "mainnet"
         self.matcher = "https://nodes.wavesnodes.com"
@@ -18,16 +17,18 @@ class SimpleBot:
         self.amount_asset = pw.WAVES
         self.price_asset = pw.Asset("8LQW8f7P5d5PZM7GtZEBgaqRPGSzS3DfPuiXrURJ4AJS")  # BTC
         self.price_step = 0.005
+        self.min_amount = 1
+        self.seconds_to_sleep = 15
 
     def log(self, msg):
         timestamp = datetime.datetime.utcnow().strftime("%b %d %Y %H:%M:%S UTC")
-        s = "[%s]:%s" % (timestamp, msg)
+        s = "[{0}]:{1}".format(timestamp, msg)
         print(s)
         try:
             f = open(self.log_file, "a")
             f.write(s + "\n")
             f.close()
-        except:
+        except OSError:
             pass
 
     def read_config(self, cfg_file):
@@ -36,9 +37,8 @@ class SimpleBot:
             self.log("Exiting.")
             exit(1)
 
-        # parse config file
         try:
-            self.log("%sReading config file '%s'" % cfg_file)
+            self.log("Reading config file '{0}'".format(cfg_file))
             config = configparser.RawConfigParser()
             config.read(cfg_file)
             self.node = config.get('main', 'node')
@@ -56,9 +56,6 @@ class SimpleBot:
             if price_asset_id == "WAVES":
                 price_asset_id = pw.Asset(pw.WAVES)
             self.price_asset = pw.Asset(price_asset_id)
-
-            self.log("Amount Asset ID : %s" % amount_asset_id)
-            self.log("Price Asset ID : %s" % price_asset_id)
         except OSError:
             self.log("Error reading config file")
             self.log("Exiting.")
@@ -68,39 +65,39 @@ class SimpleBot:
 def main():
     bot = SimpleBot()
     bot.read_config("config.cfg")
-    # set Matcher node to use
     pw.setNode(node=bot.node, chain=bot.chain)
     pw.setMatcher(node=bot.matcher)
     my_address = pw.Address(privateKey=bot.private_key)
 
     waves_btc = pw.AssetPair(bot.amount_asset, bot.price_asset)
     while True:
-        # get Waves balance
-        bot.log("Your balance is %18d" % my_address.balance())
-        # get BTC balance
-        bot.log("Your balance is %18d" % my_address.balance('8LQW8f7P5d5PZM7GtZEBgaqRPGSzS3DfPuiXrURJ4AJS'))
+        waves_balance = my_address.balance()
+        bot.log("Your balance is %18d" % waves_balance)
+        btc_balance = my_address.balance('8LQW8f7P5d5PZM7GtZEBgaqRPGSzS3DfPuiXrURJ4AJS')
+        bot.log("Your balance is %18d" % btc_balance)
         my_address.cancelOpenOrders(waves_btc)
         order_book = waves_btc.orderbook()
-        mean_spread_price = math.ceil((order_book["bids"][0]["price"] + order_book["asks"][0]["price"])/2)
-        bid_price = mean_spread_price * (1 - bot.price_step)
-        ask_price = mean_spread_price * (1 + bot.price_step)
-        positive_or_zero = (lambda x: x if x > 0 else 0)
-        bid_amount = positive_or_zero(int((my_address.balance(waves_btc.a2) / bid_price) * 10 ** pw.WAVES.decimals)
-                                      - bot.order_fee)
-        ask_amount = positive_or_zero(int((my_address.balance() - bot.order_fee)))
+        best_bid = order_book["bids"][0]["price"]
+        best_ask = order_book["asks"][0]["price"]
+        spread_mean_price = (best_bid + best_ask) // 2
+        bid_price = spread_mean_price * (1 - bot.price_step)
+        ask_price = spread_mean_price * (1 + bot.price_step)
+        bid_amount = int((btc_balance / bid_price) * 10 ** pw.WAVES.decimals) - bot.order_fee
+        ask_amount = int(waves_balance - bot.order_fee)
 
-        bot.log("Best_bid: {0}, best_ask: {1}".format(order_book["bids"][0]["price"], order_book["asks"][0]["price"]))
+        bot.log("Best_bid: {0}, best_ask: {1}, spread mean price: {2}".format(best_bid, best_ask, spread_mean_price))
 
-        bot.log("Post buy order with price: {0}, amount:{1}".format(bid_price, bid_amount))
-        my_address.buy(assetPair=waves_btc, amount=bid_amount, price=bid_price, matcherFee=bot.order_fee,
-                       maxLifetime=bot.order_lifetime)
+        if bid_amount >= bot.min_amount:
+            bot.log("Post buy order with price: {0}, amount:{1}".format(bid_price, bid_amount))
+            my_address.buy(assetPair=waves_btc, amount=bid_amount, price=bid_price, matcherFee=bot.order_fee,
+                           maxLifetime=bot.order_lifetime)
+        if ask_amount >= bot.min_amount:
+            bot.log("Post sell order with price: {0}, ask amount: {1}".format(ask_price, ask_amount))
+            my_address.sell(assetPair=waves_btc, amount=ask_amount, price=ask_price, matcherFee=bot.order_fee,
+                            maxLifetime=bot.order_lifetime)
 
-        bot.log("Post sell order with price: {0}, ask amount: {1}".format(ask_price, ask_amount))
-        my_address.sell(assetPair=waves_btc, amount=ask_amount, price=ask_price, matcherFee=bot.order_fee,
-                        maxLifetime=bot.order_lifetime)
-
-        bot.log("Sleep 15 sec...")
-        sleep(15)  # time in seconds
+        bot.log("Sleep {0} seconds...".format(bot.seconds_to_sleep))
+        sleep(bot.seconds_to_sleep)
 
 
 if __name__ == "__main__":
