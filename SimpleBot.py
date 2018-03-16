@@ -15,7 +15,8 @@ class SimpleBot:
         self.order_lifetime = 29 * 86400  # 29 days
         self.private_key = ""
         self.amount_asset = pw.WAVES
-        self.price_asset = pw.Asset("8LQW8f7P5d5PZM7GtZEBgaqRPGSzS3DfPuiXrURJ4AJS")  # BTC
+        self.price_asset_id = "8LQW8f7P5d5PZM7GtZEBgaqRPGSzS3DfPuiXrURJ4AJS" # BTC
+        self.price_asset = pw.Asset(self.price_asset_id)  
         self.price_step = 0.005
         self.min_amount = 1
         self.seconds_to_sleep = 15
@@ -52,10 +53,10 @@ class SimpleBot:
             if amount_asset_id == "WAVES":
                 amount_asset_id = pw.WAVES
             self.amount_asset = amount_asset_id
-            price_asset_id = config.get('market', 'price_asset')
-            if price_asset_id == "WAVES":
-                price_asset_id = pw.Asset(pw.WAVES)
-            self.price_asset = pw.Asset(price_asset_id)
+            self.price_asset_id = config.get('market', 'price_asset')
+            if self.price_asset_id == "WAVES":
+                self.price_asset_id = pw.Asset(pw.WAVES)
+            self.price_asset = pw.Asset(self.price_asset_id)
         except OSError:
             self.log("Error reading config file")
             self.log("Exiting.")
@@ -73,7 +74,7 @@ def main():
     while True:
         waves_balance = my_address.balance()
         bot.log("Your balance is %18d" % waves_balance)
-        btc_balance = my_address.balance('8LQW8f7P5d5PZM7GtZEBgaqRPGSzS3DfPuiXrURJ4AJS')
+        btc_balance = my_address.balance(bot.price_asset_id)
         bot.log("Your balance is %18d" % btc_balance)
         my_address.cancelOpenOrders(waves_btc)
         order_book = waves_btc.orderbook()
@@ -84,7 +85,7 @@ def main():
         ask_price = spread_mean_price * (1 + bot.price_step)
         bid_amount = int((btc_balance / bid_price) * 10 ** pw.WAVES.decimals) - bot.order_fee
         waves_balance = my_address.balance()
-        ask_amount = int(waves_balance - bot.order_fee)
+        ask_amount = int(waves_balance) - bot.order_fee
 
         bot.log("Best_bid: {0}, best_ask: {1}, spread mean price: {2}".format(best_bid, best_ask, spread_mean_price))
 
