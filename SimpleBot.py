@@ -84,8 +84,6 @@ def main():
         bid_price = spread_mean_price * (1 - bot.price_step)
         ask_price = spread_mean_price * (1 + bot.price_step)
         bid_amount = int((btc_balance / bid_price) * 10 ** pw.WAVES.decimals) - bot.order_fee
-        waves_balance = my_address.balance()
-        ask_amount = int(waves_balance) - bot.order_fee
 
         bot.log("Best_bid: {0}, best_ask: {1}, spread mean price: {2}".format(best_bid, best_ask, spread_mean_price))
 
@@ -93,6 +91,9 @@ def main():
             bot.log("Post buy order with price: {0}, amount:{1}".format(bid_price, bid_amount))
             my_address.buy(assetPair=waves_btc, amount=bid_amount, price=bid_price, matcherFee=bot.order_fee,
                            maxLifetime=bot.order_lifetime)
+
+        waves_balance = my_address.balance()
+        ask_amount = int(waves_balance) - bot.order_fee
         if ask_amount >= bot.min_amount:
             bot.log("Post sell order with price: {0}, ask amount: {1}".format(ask_price, ask_amount))
             my_address.sell(assetPair=waves_btc, amount=ask_amount, price=ask_price, matcherFee=bot.order_fee,
