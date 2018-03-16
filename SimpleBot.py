@@ -83,6 +83,7 @@ def main():
         bid_price = spread_mean_price * (1 - bot.price_step)
         ask_price = spread_mean_price * (1 + bot.price_step)
         bid_amount = int((btc_balance / bid_price) * 10 ** pw.WAVES.decimals) - bot.order_fee
+        waves_balance = my_address.balance()
         ask_amount = int(waves_balance - bot.order_fee)
 
         bot.log("Best_bid: {0}, best_ask: {1}, spread mean price: {2}".format(best_bid, best_ask, spread_mean_price))
