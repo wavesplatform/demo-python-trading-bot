@@ -18,7 +18,7 @@ class SimpleBot:
         self.price_asset_id = "8LQW8f7P5d5PZM7GtZEBgaqRPGSzS3DfPuiXrURJ4AJS" # BTC
         self.price_asset = pw.Asset(self.price_asset_id)  
         self.price_step = 0.005
-        self.min_amount = 1
+        self.min_amount = 10000
         self.seconds_to_sleep = 15
 
     def log(self, msg):
