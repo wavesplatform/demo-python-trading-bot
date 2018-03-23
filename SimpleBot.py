@@ -92,7 +92,7 @@ def main():
             my_address.buy(assetPair=waves_btc, amount=bid_amount, price=bid_price, matcherFee=bot.order_fee,
                            maxLifetime=bot.order_lifetime)
 
-        waves_balance = my_address.balance()
+        waves_balance, btc_balance = my_address.tradableBalance(waves_btc)
         ask_amount = int(waves_balance) - bot.order_fee
         if ask_amount >= bot.min_amount:
             bot.log("Post sell order with price: {0}, ask amount: {1}".format(ask_price, ask_amount))
