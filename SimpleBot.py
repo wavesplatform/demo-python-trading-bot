@@ -49,10 +49,10 @@ class SimpleBot:
             self.order_lifetime = config.getint('main', 'order_lifetime')
 
             self.private_key = config.get('account', 'private_key')
-            amount_asset_id = config.get('market', 'amount_asset')
-            if amount_asset_id == "WAVES":
-                amount_asset_id = pw.WAVES
-            self.amount_asset = amount_asset_id
+            self.amount_asset_id = config.get('market', 'amount_asset')
+            if self.amount_asset_id == "WAVES":
+                self.amount_asset_id = pw.WAVES
+            self.amount_asset = pw.Asset(self.amount_asset_id)
             self.price_asset_id = config.get('market', 'price_asset')
             if self.price_asset_id == "WAVES":
                 self.price_asset_id = pw.Asset(pw.WAVES)
