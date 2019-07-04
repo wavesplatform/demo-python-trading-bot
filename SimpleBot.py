@@ -14,7 +14,8 @@ class SimpleBot:
         self.order_fee = int(0.003 * 10 ** 8)
         self.order_lifetime = 29 * 86400  # 29 days
         self.private_key = ""
-        self.amount_asset = pw.WAVES
+        self.amount_asset_id = pw.WAVES
+        self.amount_asset = pw.Asset(pw.WAVES)
         self.price_asset_id = "8LQW8f7P5d5PZM7GtZEBgaqRPGSzS3DfPuiXrURJ4AJS" # BTC
         self.price_asset = pw.Asset(self.price_asset_id)  
         self.price_step = 0.005
@@ -50,12 +51,8 @@ class SimpleBot:
 
             self.private_key = config.get('account', 'private_key')
             self.amount_asset_id = config.get('market', 'amount_asset')
-            if self.amount_asset_id == "WAVES":
-                self.amount_asset_id = pw.WAVES
             self.amount_asset = pw.Asset(self.amount_asset_id)
             self.price_asset_id = config.get('market', 'price_asset')
-            if self.price_asset_id == "WAVES":
-                self.price_asset_id = pw.Asset(pw.WAVES)
             self.price_asset = pw.Asset(self.price_asset_id)
         except OSError:
             self.log("Error reading config file")
