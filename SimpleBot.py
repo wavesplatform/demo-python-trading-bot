@@ -54,7 +54,7 @@ class SimpleBot:
             self.amount_asset = pw.Asset(self.amount_asset_id)
             self.price_asset_id = config.get('market', 'price_asset')
             self.price_asset = pw.Asset(self.price_asset_id)
-            self.price_step = config.get('market', 'price_step')
+            self.price_step = config.getint('market', 'price_step')
         except OSError:
             self.log("Error reading config file")
             self.log("Exiting.")
