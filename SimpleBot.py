@@ -54,7 +54,7 @@ class SimpleBot:
             self.amount_asset = pw.Asset(self.amount_asset_id)
             self.price_asset_id = config.get('market', 'price_asset')
             self.price_asset = pw.Asset(self.price_asset_id)
-            self.price_step = config.getint('market', 'price_step')
+            self.price_step = config.getfloat('market', 'price_step')
         except OSError:
             self.log("Error reading config file")
             self.log("Exiting.")
@@ -78,7 +78,7 @@ def main():
         order_book = waves_btc.orderbook()
         best_bid = order_book["bids"][0]["price"]
         best_ask = order_book["asks"][0]["price"]
-        spread_mean_price = ((best_bid + best_ask) // 2) * 10 ** (bot.price_asset.decimals - bot.amount_asset.decimals)
+        spread_mean_price = (best_bid + best_ask) // 2
         bid_price = spread_mean_price * (1 - bot.price_step)
         ask_price = spread_mean_price * (1 + bot.price_step)
         bid_amount = int((btc_balance / bid_price) * 10 ** pw.WAVES.decimals) - bot.order_fee
