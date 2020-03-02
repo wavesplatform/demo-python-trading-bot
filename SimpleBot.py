@@ -10,16 +10,15 @@ class SimpleBot:
         self.log_file = "bot.log"
         self.node = "https://nodes.wavesnodes.com"
         self.chain = "mainnet"
-        self.matcher = "https://nodes.wavesnodes.com"
+        self.matcher = "https://matcher.waves.exchange"
         self.order_fee = int(0.003 * 10 ** 8)
         self.order_lifetime = 29 * 86400  # 29 days
         self.private_key = ""
-        self.amount_asset_id = pw.WAVES
-        self.amount_asset = pw.Asset(pw.WAVES)
+        self.amount_asset = pw.WAVES
         self.price_asset_id = "8LQW8f7P5d5PZM7GtZEBgaqRPGSzS3DfPuiXrURJ4AJS" # BTC
         self.price_asset = pw.Asset(self.price_asset_id)  
         self.price_step = 0.005
-        self.min_amount = 10000
+        self.min_amount = 1
         self.seconds_to_sleep = 15
 
     def log(self, msg):
@@ -78,7 +77,7 @@ def main():
         order_book = waves_btc.orderbook()
         best_bid = order_book["bids"][0]["price"]
         best_ask = order_book["asks"][0]["price"]
-        spread_mean_price = (best_bid + best_ask) // 2
+        spread_mean_price = ((best_bid + best_ask) // 2) * 10 ** (bot.price_asset.decimals - bot.amount_asset.decimals)
         bid_price = spread_mean_price * (1 - bot.price_step)
         ask_price = spread_mean_price * (1 + bot.price_step)
         bid_amount = int((btc_balance / bid_price) * 10 ** pw.WAVES.decimals) - bot.order_fee
